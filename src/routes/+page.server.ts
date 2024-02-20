@@ -39,6 +39,7 @@ export async function load() {
         const userBinding = await conn.write('/ip/hotspot/ip-binding/print');
         // console.log(userHost.some(obj => obj['mac-address'] == '08:00:27:4A:24:E4'));
 
+        // console.log(userBinding[0]['disabled'])
         conn.close();
         return {
             komputer: hostData,
@@ -70,23 +71,24 @@ export const actions: Actions = {
         const data = await event.request.formData();
 
         const bindings = await conn.write('/ip/hotspot/ip-binding/print')
-        let result, id = bindings.filter(obj => obj['mac-address'] == data.get('target'))[0]['.id']
+        const hosts = await conn.write('/ip/hotspot/host/print')
 
-        if (id) {
-            result = await conn.write('/ip/hotspot/ip-binding/disable', [
-                `=.id=${id}`,
-            ])
-        }
-        
-        if (!id) {
-            const hosts = await conn.write('/ip/hotspot/host/print')
+        let result, id
+
+        console.log(bindings, hosts)
+        if (bindings.length == 0) {
+            console.log("execute => make binding (start)")
             id = hosts.filter(obj => obj['mac-address'] == data.get('target'))[0]['.id']
-
             result = await conn.write('/ip/hotspot/host/make-binding', [
                 `=.id=${id}`
             ])
+            console.log("execute => make binding (done)")
+            //     id = bindings.filter(obj => obj['mac-address'] == data.get('target'))[0]['.id']
+            //     result = await conn.write('/ip/hotspot/ip-binding/disable', [
+            //         `=.id=${id}`,
+            //     ])
+        } else {
         }
-
 
         conn.close();
         return { success: true, data: result };
