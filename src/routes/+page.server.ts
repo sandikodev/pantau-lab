@@ -1,8 +1,8 @@
 import type { Actions } from '@sveltejs/kit';
 import { RouterOSAPI } from 'node-routeros';
+import { SECRET_ROS_ADDR, SECRET_ROS_USER, SECRET_ROS_PASS } from '$env/static/private'
 
-
-function customSort(a, b) {
+function customSort(a: any, b: any) {
     const nameA = a['host-name'].match(/([A-Z]+)-(\w+)/);
     const nameB = b['host-name'].match(/([A-Z]+)-(\w+)/);
 
@@ -12,12 +12,19 @@ function customSort(a, b) {
     return suffixA.localeCompare(suffixB);
 }
 
+type komputer = {
+    'host-name': string;
+    'active-mac-address': string;
+    'active-address': string;
+    'dynamic': string;
+    'status': string;
+}
 
 export async function load() {
     const conn = new RouterOSAPI({
-        host: '172.16.1.23',
-        user: 'admin',
-        password: '',
+        host: SECRET_ROS_ADDR,
+        user: SECRET_ROS_USER,
+        password: SECRET_ROS_PASS
     });
 
     try {
@@ -26,7 +33,7 @@ export async function load() {
         // console.log(hostQuery)
         // use this snippet for filtering specific prefix
         // filter(obj => obj['host-name'].startsWith('PC-A'))
-        const hostData = hostQuery.map(obj => ({
+        const hostData: komputer[] = hostQuery.map(obj => ({
             'host-name': obj['host-name'] as string,
             'active-mac-address': obj['active-mac-address'] as string,
             'active-address': obj['active-address'] as string,
@@ -62,78 +69,110 @@ export async function load() {
 export const actions: Actions = {
     binding: async (event) => {
         const conn = new RouterOSAPI({
-            host: '172.16.1.23',
-            user: 'admin',
-            password: '',
+            host: SECRET_ROS_ADDR,
+            user: SECRET_ROS_USER,
+            password: SECRET_ROS_PASS
         });
 
+        let message, bindings, target
         await conn.connect();
         const data = await event.request.formData();
+        let command = event.url.searchParams.get('/binding') == "1" ? 'bind' : 'unbind';
 
-        const bindings = await conn.write('/ip/hotspot/ip-binding/print')
-        const hosts = await conn.write('/ip/hotspot/host/print')
+        switch (command) {
+            case "bind":
+                console.log("binding => search target")
+                target = await conn.write('/ip/hotspot/ip-binding/print')
+                target = target.filter(obj => obj['mac-address'] == data.get('target'))
 
-        let result, id
+                if (target.length == 0) {
+                    // if no target available => start to make binding
+                    console.log("binding => start")
 
-        console.log(bindings, hosts)
-        if (bindings.length == 0) {
-            console.log("execute => make binding (start)")
-            id = hosts.filter(obj => obj['mac-address'] == data.get('target'))[0]['.id']
-            result = await conn.write('/ip/hotspot/host/make-binding', [
-                `=.id=${id}`
-            ])
-            console.log("execute => make binding (done)")
-            //     id = bindings.filter(obj => obj['mac-address'] == data.get('target'))[0]['.id']
-            //     result = await conn.write('/ip/hotspot/ip-binding/disable', [
-            //         `=.id=${id}`,
-            //     ])
-        } else {
+                    const dhcpServer = await conn.write('/ip/dhcp-server/lease/print')
+                    const ipLease = dhcpServer.filter(obj => obj['active-mac-address'] == data.get('target'))[0]['address']
+
+                    await conn.write('/ip/hotspot/ip-binding/add', [
+                        `=mac-address=${data.get('target')}`,
+                        `=address=${ipLease}`,
+                        `=to-address=${ipLease}`,
+                    ])
+
+                    message = "binding done"
+                    console.log("binding => success")
+                } else if (target[0]['disabled'] == 'true') {
+                    console.log("re-binding => start")
+
+                    target = target.filter(obj => obj['mac-address'] == data.get('target'))[0]['.id']
+                    await conn.write('/ip/hotspot/ip-binding/enable', [
+                        `=.id=${target}`,
+                    ])
+
+                    console.log("re-binding => success")
+                } else {
+                    console.log("binding => skipped")
+                }
+                break;
+            case "unbind":
+                console.log("unbinding => search target")
+                bindings = await conn.write('/ip/hotspot/ip-binding/print')
+                target = bindings.length && bindings.filter(obj => obj['mac-address'] == data.get('target'))[0]['.id']
+                const isEnabled = bindings.filter(obj => obj['mac-address'] == data.get('target'))[0]['disabled'] == 'false'
+
+                if (target != 0 && isEnabled) {
+                    console.log("unbinding => start")
+                    await conn.write('/ip/hotspot/ip-binding/disable', [
+                        `=.id=${target}`,
+                    ])
+                    console.log("unbinding => success")
+                }
+                break;
+            default:
+                console.log("error")
+                break;
         }
 
         conn.close();
-        return { success: true, data: result };
+        return { success: true, data: message };
     },
-    unBinding: async (event) => {
+    bindOption: async (event) => {
         const conn = new RouterOSAPI({
-            host: '172.16.1.23',
-            user: 'admin',
-            password: '',
-        });
-        await conn.connect();
-        const data = await event.request.formData();
-
-        const bindings = await conn.write('/ip/hotspot/ip-binding/print')
-        let id = bindings.filter(obj => obj['mac-address'] == data.get('target'))[0]['.id']
-
-        let result = await conn.write('/ip/hotspot/ip-binding/disable', [
-            `=.id=${id}`,
-        ])
-
-        conn.close();
-        return { success: true, data: result };
-    },
-
-    bindBypass: async (event) => {
-        const conn = new RouterOSAPI({
-            host: '172.16.1.23',
-            user: 'admin',
-            password: '',
+            host: SECRET_ROS_ADDR,
+            user: SECRET_ROS_USER,
+            password: SECRET_ROS_PASS
         });
 
         await conn.connect();
         const data = await event.request.formData();
-        // Object.fromEntries(data)
-        // ip hotspot ip-binding set [find where address=10.10.10.99] type=regular 
 
         const bindings = await conn.write('/ip/hotspot/ip-binding/print');
         const id = bindings.filter(obj => obj['mac-address'] == data.get('target'))[0]['.id']
 
-        const Set = await conn.write('/ip/hotspot/ip-binding/set', [
-            `?.id=0`,
-            '=type=regular'
-        ]);
-
-        // console.log(id);
+        switch (event.url.searchParams.get('/bindOption')) {
+            case "block":
+                await conn.write('/ip/hotspot/ip-binding/set', [
+                    `=.id=${id}`,
+                    '=type=blocked'
+                ]);
+                console.log("bindOption => blocked success", id)
+                break;
+            case "bypass":
+                await conn.write('/ip/hotspot/ip-binding/set', [
+                    `=.id=${id}`,
+                    '=type=bypass'
+                ]);
+                console.log("bindOption => bypass success", id)
+                break;
+            case "normal":
+                await conn.write('/ip/hotspot/ip-binding/set', [
+                    `=.id=${id}`,
+                    '=type=regular'
+                ]);
+                console.log("bindOption => normal success", id)
+                break;
+            default:
+                break;
+        }
 
         conn.close();
         return { success: true };

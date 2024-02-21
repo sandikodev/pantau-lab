@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Fa from 'svelte-fa';
-	import { faHeart, faNetworkWired } from '@fortawesome/free-solid-svg-icons';
+	import { faNetworkWired } from '@fortawesome/free-solid-svg-icons';
 
 	import type { PageData } from './$types';
 
@@ -9,21 +9,14 @@
 
 	let { komputer, user } = data;
 
-	// console.log(user?.host.every((obj) => obj['mac-address'] == item['active-mac-address']));
-	function binding() {
-		alert('ok');
-	}
+	let bindDisabled = (target: string) => {
+		return user?.binding.filter((data) => data['mac-address'] == target)[0]?.disabled == 'true';
+	};
 
-	function unbinding() {
-		alert('ok');
-	}
+	let bindAvailable = (target: string) => {
+		return user?.binding.filter((data) => data['mac-address'] == target)[0];
+	};
 
-	function bindingBlock() {
-		alert('ok');
-	}
-	function bindingRegular() {
-		alert('ok');
-	}
 	function bindingBypass() {
 		alert('ok');
 	}
@@ -93,24 +86,24 @@
 								<Fa icon={faNetworkWired} />
 							</div>
 						</header>
-						<div class="flex-1">
+						<div>
 							<form method="POST" class="px-2">
 								<input type="hidden" name="target" id="target" value={item['active-mac-address']} />
-								{#if user?.host.some((obj) => obj['mac-address'] == item['active-mac-address']) || (user?.binding.some((obj) => obj['mac-address'] == item['active-mac-address']) && user?.binding.some((obj) => obj['disabled'] == 'true'))}
+								{#if item['status'] == 'bound' && bindDisabled(item['active-mac-address'])}
 									<button
-										formaction="?/binding"
+										formaction="?/binding=1"
 										class="w-full text-gray-900 bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
 										>Binding</button
 									>
-								{:else if user?.binding.some((obj) => obj['mac-address'] == item['active-mac-address']) && user?.binding.some((obj) => obj['disabled'] == 'false')}
+								{:else if !bindDisabled(item['active-mac-address']) && bindAvailable(item['active-mac-address'])}
 									<button
-										formaction="?/unBinding"
+										formaction="?/binding=0"
 										class="w-full text-white bg-red-400 hover:bg-red-500 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:focus:ring-red-900"
 										>Unbinding</button
 									>
 								{/if}
 							</form>
-							{#if user?.binding.some((obj) => obj['mac-address'] == item['active-mac-address']) && user?.binding.some((obj) => obj['disabled'] == 'false')}
+							{#if !bindDisabled(item['active-mac-address']) && bindAvailable(item['active-mac-address'])}
 								<form method="POST" class="flex px-2">
 									<input
 										type="hidden"
@@ -119,54 +112,75 @@
 										value={item['active-mac-address']}
 									/>
 									<button
-										on:click={bindingBlock}
-										type="button"
+										formaction="?/bindOption=block"
 										class="w-full text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
-										>Mati</button
+										>block</button
 									>
 									<button
-										id="cek"
-										formaction="?/bindBypass"
+										formaction="?/bindOption=bypass"
 										class="w-full text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
-										>Nyala</button
+										>bypass</button
 									>
 									<button
-										on:click={bindingBypass}
-										type="button"
+										formaction="?/bindOption=normal"
 										class="w-full text-gray-900 bg-purple border border-purple-300 focus:outline-none hover:bg-purple-100 focus:ring-4 focus:ring-purple-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-purple dark:border-purple-600 dark:hover:bg-purple-700 dark:hover:border-purple-600 dark:focus:ring-purple-700"
-										>Bypass</button
+										>normal</button
 									>
 								</form>
 							{/if}
 						</div>
-						<div>
-							<div class="space-y-2 py-2">
-								<ul class="px-4">
-									<li>mac: {item['active-mac-address']}</li>
-									<li>
-										address: <input
+						<div class="flex-1 flex flex-col justify-between">
+							<div class="h-full space-y-2 py-2">
+								{#if item['status'] == 'bound'}
+									<form action="" class="px-4">
+										<label for="mac" class="block text-sm font-medium text-gray-900 dark:text-white"
+											>mac</label
+										>
+										<input
 											type="text"
+											id="mac"
+											class="mb-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+											value={item['active-mac-address']}
+											disabled
+										/>
+										<label
+											for="address"
+											class="block text-sm font-medium text-gray-900 dark:text-white">address</label
+										>
+										<input
+											type="text"
+											id="address"
+											class="mb-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 											value={item['active-address']}
 											disabled={item['dynamic'] == 'true'}
 										/>
-									</li>
-								</ul>
+									</form>
+								{:else}
+									<div class="h-full px-4 flex flex-col items-center justify-center">
+										<h1 class="font-semibold">Komputer tidak terhubung</h1>
+										<p class="mt-4 text-center">
+											Silahkan cek kabel Lan atau Komputer dalam keadaan mati
+										</p>
+									</div>
+								{/if}
 							</div>
-							<a href="https://google.com">
-								<img
-									alt="Placeholder"
-									class="block h-auto w-full"
-									src="https://picsum.photos/600/400/?random"
-								/>
-							</a>
-							<footer class="flex items-center justify-between leading-tight p-2 md:p-4">
-								<p class="text-md">
-									<!-- pengguna: {user?.filter((obj) => obj['address'] == '10.10.10.49')[0]['user'] ?? ''} -->
-								</p>
-								<p class="text-grey-darker text-sm">
-									<!-- uptime: {user?.filter((obj) => obj['address'] == '10.10.10.49')[0]['uptime'] ?? ''} -->
-								</p>
-							</footer>
+							<div>
+								<a href="https://google.com">
+									<img
+										alt="Placeholder"
+										class="block h-auto w-full"
+										src="https://picsum.photos/600/400/?random"
+									/>
+								</a>
+								<footer class="flex items-center justify-between leading-tight p-2 md:p-4">
+									<p class="text-md">
+										<!-- pengguna: {user?.filter((obj) => obj['address'] == '10.10.10.49')[0]['user'] ?? ''} -->
+									</p>
+									<p class="text-grey-darker text-sm">
+										<!-- uptime: {user?.filter((obj) => obj['address'] == '10.10.10.49')[0]['uptime'] ?? ''} -->
+									</p>
+								</footer>
+							</div>
 						</div>
 					</article>
 				</div>
