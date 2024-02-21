@@ -25,26 +25,6 @@
 {#if error}
 	<p>Error: {error}</p>
 {:else if data}
-	<div class="flex justify-end p-2">
-		<div class="p-4 max-w-sm rounded overflow-hidden shadow-lg">
-			<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-				<tr>
-					<td class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
-						>terhubung</td
-					>
-					<td>:</td>
-					<td>komputer menyala</td>
-				</tr>
-				<tr>
-					<td class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
-						>putus</td
-					>
-					<td>:</td>
-					<td>komputer mati</td>
-				</tr>
-			</table>
-		</div>
-	</div>
 	<div class="container my-12 mx-auto px-4 md:px-12">
 		<div class="flex flex-wrap -mx-1 lg:-mx-4">
 			{#each komputer as item}
@@ -53,9 +33,8 @@
 					style={item['status'] == 'waiting' ? 'border-color: red' : 'border-color: green'}
 				>
 					<article
-						class="flex flex-col h-full justify-between overflow-hidden rounded-lg shadow-lg {item[
-							'dynamic'
-						] == 'true'
+						class="flex flex-col h-full overflow-hidden rounded-lg shadow-lg {item['dynamic'] ==
+						'true'
 							? 'bg-gray-200'
 							: 'bg-inherit'}"
 					>
@@ -86,7 +65,7 @@
 								<Fa icon={faNetworkWired} />
 							</div>
 						</header>
-						<div>
+						<div class="h-full flex flex-col">
 							<form method="POST" class="px-2">
 								<input type="hidden" name="target" id="target" value={item['active-mac-address']} />
 								{#if (item['status'] == 'bound' && !bindAvailable(item['active-mac-address'])) || bindDisabled(item['active-mac-address'])}
@@ -129,8 +108,6 @@
 									>
 								</form>
 							{/if}
-						</div>
-						<div class="flex-1 flex flex-col justify-between">
 							<div class="h-full space-y-2 py-2 flex flex-col justify-end">
 								{#if item['status'] == 'bound'}
 									<form method="POST" action="?/leaseChange" class="px-4">
@@ -179,29 +156,27 @@
 									</div>
 								{/if}
 							</div>
-							<div>
-								<a href="https://google.com">
-									<img
-										alt="Placeholder"
-										class="block h-auto w-full"
-										src="https://picsum.photos/600/400/?random"
-									/>
-								</a>
+						</div>
+						<div class="flex flex-col">
+							<img
+								alt="Placeholder"
+								class="block h-auto w-full"
+								src="https://picsum.photos/600/400/?random"
+							/>
+							{#if user?.active.filter((obj) => obj['address'] == item['active-address']).length}
 								<footer class="flex items-center justify-between leading-tight p-2 md:p-4">
-									{#if user?.active.filter((obj) => obj['address'] == item['active-address']).length}
-										<p class="text-md">
-											pengguna: {user?.active.filter(
-												(obj) => obj['address'] == item['active-address']
-											)[0]['user']}
-										</p>
-										<p class="text-grey-darker text-sm">
-											uptime: {user?.active.filter(
-												(obj) => obj['address'] == item['active-address']
-											)[0]['uptime']}
-										</p>
-									{/if}
+									<p class="text-md">
+										pengguna: {user?.active.filter(
+											(obj) => obj['address'] == item['active-address']
+										)[0]['user']}
+									</p>
+									<p class="text-grey-darker text-sm">
+										uptime: {user?.active.filter(
+											(obj) => obj['address'] == item['active-address']
+										)[0]['uptime']}
+									</p>
 								</footer>
-							</div>
+							{/if}
 						</div>
 					</article>
 				</div>
