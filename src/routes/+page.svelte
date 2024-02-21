@@ -10,6 +10,7 @@
 	let { komputer, user } = data;
 
 	let bindDisabled = (target: string) => {
+		console.log(user?.binding);
 		return user?.binding.filter((data) => data['mac-address'] == target)[0]?.disabled == 'true';
 	};
 
@@ -89,7 +90,7 @@
 						<div>
 							<form method="POST" class="px-2">
 								<input type="hidden" name="target" id="target" value={item['active-mac-address']} />
-								{#if item['status'] == 'bound' && bindDisabled(item['active-mac-address'])}
+								{#if item['status'] == 'bound'}
 									<button
 										formaction="?/binding=1"
 										class="w-full text-gray-900 bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
@@ -130,18 +131,30 @@
 							{/if}
 						</div>
 						<div class="flex-1 flex flex-col justify-between">
-							<div class="h-full space-y-2 py-2">
+							<div class="h-full space-y-2 py-2 flex flex-col justify-end">
 								{#if item['status'] == 'bound'}
-									<form action="" class="px-4">
-										<label for="mac" class="block text-sm font-medium text-gray-900 dark:text-white"
-											>mac</label
+									<form method="POST" action="?/leaseChange" class="px-4">
+										<label
+											for="macaddr"
+											class="block text-sm font-medium text-gray-900 dark:text-white">mac</label
 										>
 										<input
 											type="text"
-											id="mac"
-											class="mb-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+											id="macaddr"
+											name="macaddr"
+											class="pointer-events-none mb-2 bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 											value={item['active-mac-address']}
-											disabled
+										/>
+										<label
+											for="activeaddr"
+											class="block text-sm font-medium text-gray-900 dark:text-white">active</label
+										>
+										<input
+											type="text"
+											id="activeaddr"
+											name="activeaddr"
+											class="pointer-events-none mb-2 bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+											value={item['active-address']}
 										/>
 										<label
 											for="address"
@@ -150,10 +163,12 @@
 										<input
 											type="text"
 											id="address"
+											name="address"
 											class="mb-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-											value={item['active-address']}
+											value={item['address']}
 											disabled={item['dynamic'] == 'true'}
 										/>
+										<button type="submit" class="hidden" aria-hidden="true"></button>
 									</form>
 								{:else}
 									<div class="h-full px-4 flex flex-col items-center justify-center">

@@ -37,6 +37,7 @@ export async function load() {
             'host-name': obj['host-name'] as string,
             'active-mac-address': obj['active-mac-address'] as string,
             'active-address': obj['active-address'] as string,
+            'address': obj['address'] as string,
             'dynamic': obj['dynamic'] as string,
             'status': obj['status'] as string
         })).sort(customSort);
@@ -177,4 +178,32 @@ export const actions: Actions = {
         conn.close();
         return { success: true };
     },
+    leaseChange: async (event) => {
+        const conn = new RouterOSAPI({
+            host: SECRET_ROS_ADDR,
+            user: SECRET_ROS_USER,
+            password: SECRET_ROS_PASS
+        });
+
+        await conn.connect();
+        const data = await event.request.formData();
+
+        console.log("lease => search target")
+        const dhcpServer = await conn.write('/ip/dhcp-server/lease/print')
+        const target = dhcpServer.filter(obj => obj['active-mac-address'] == data.get('macaddr'))
+
+        if (target.length != 0 && (target[0]['address'] != data.get('address'))) {
+            console.log("lease => search start")
+            const id = target[0]['.id']
+            await conn.write('/ip/dhcp-server/lease/set', [
+                `=.id=${id}`,
+                `=address=${data.get('address')}`
+            ]).then(() =>
+                console.log("lease => updated")
+            );
+        }
+        console.log("lease => done")
+        conn.close();
+        return { success: true };
+    }
 };
