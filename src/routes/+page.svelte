@@ -10,7 +10,6 @@
 	let { komputer, user } = data;
 
 	let bindDisabled = (target: string) => {
-		console.log(user?.binding);
 		return user?.binding.filter((data) => data['mac-address'] == target)[0]?.disabled == 'true';
 	};
 
@@ -188,14 +187,20 @@
 										src="https://picsum.photos/600/400/?random"
 									/>
 								</a>
-								<footer class="flex items-center justify-between leading-tight p-2 md:p-4">
-									<p class="text-md">
-										<!-- pengguna: {user?.filter((obj) => obj['address'] == '10.10.10.49')[0]['user'] ?? ''} -->
-									</p>
-									<p class="text-grey-darker text-sm">
-										<!-- uptime: {user?.filter((obj) => obj['address'] == '10.10.10.49')[0]['uptime'] ?? ''} -->
-									</p>
-								</footer>
+								{#if user?.active.filter((obj) => obj['address'] == item['active-address']).length}
+									<footer class="flex items-center justify-between leading-tight p-2 md:p-4">
+										<p class="text-md">
+											pengguna: {user?.active.filter(
+												(obj) => obj['address'] == item['active-address']
+											)[0]['user']}
+										</p>
+										<p class="text-grey-darker text-sm">
+											uptime: {user?.active.filter(
+												(obj) => obj['address'] == item['active-address']
+											)[0]['uptime']}
+										</p>
+									</footer>
+								{/if}
 							</div>
 						</div>
 					</article>
