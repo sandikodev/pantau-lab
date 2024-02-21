@@ -90,13 +90,14 @@
 						<div>
 							<form method="POST" class="px-2">
 								<input type="hidden" name="target" id="target" value={item['active-mac-address']} />
-								{#if item['status'] == 'bound'}
+								{#if (item['status'] == 'bound' && !bindAvailable(item['active-mac-address'])) || bindDisabled(item['active-mac-address'])}
 									<button
 										formaction="?/binding=1"
 										class="w-full text-gray-900 bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
 										>Binding</button
 									>
-								{:else if !bindDisabled(item['active-mac-address']) && bindAvailable(item['active-mac-address'])}
+								{/if}
+								{#if !bindDisabled(item['active-mac-address']) && bindAvailable(item['active-mac-address'])}
 									<button
 										formaction="?/binding=0"
 										class="w-full text-white bg-red-400 hover:bg-red-500 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:focus:ring-red-900"
