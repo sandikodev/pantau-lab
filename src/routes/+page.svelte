@@ -187,8 +187,8 @@
 										src="https://picsum.photos/600/400/?random"
 									/>
 								</a>
-								{#if user?.active.filter((obj) => obj['address'] == item['active-address']).length}
-									<footer class="flex items-center justify-between leading-tight p-2 md:p-4">
+								<footer class="flex items-center justify-between leading-tight p-2 md:p-4">
+									{#if user?.active.filter((obj) => obj['address'] == item['active-address']).length}
 										<p class="text-md">
 											pengguna: {user?.active.filter(
 												(obj) => obj['address'] == item['active-address']
@@ -199,8 +199,8 @@
 												(obj) => obj['address'] == item['active-address']
 											)[0]['uptime']}
 										</p>
-									</footer>
-								{/if}
+									{/if}
+								</footer>
 							</div>
 						</div>
 					</article>
