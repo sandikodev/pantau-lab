@@ -12,6 +12,19 @@ function customSort(a: any, b: any) {
     return suffixA.localeCompare(suffixB);
 }
 
+function customSortNew(a: any, b: any) {
+    const regex = /lab1-(\w)(\d+)/; // Regular expression to match lab1- followed by a letter and then digits
+    const [, charA, numA] = a['host-name'].match(regex);
+    const [, charB, numB] = b['host-name'].match(regex);
+
+    if (charA !== charB) {
+        return charA.localeCompare(charB); // Sort alphabetically
+    } else {
+        return parseInt(numA) - parseInt(numB); // Sort numerically
+    }
+}
+
+
 type komputer = {
     'host-name': string;
     'active-mac-address': string;
@@ -40,7 +53,7 @@ export async function load() {
             'address': obj['address'] as string,
             'dynamic': obj['dynamic'] as string,
             'status': obj['status'] as string
-        })).sort(customSort);
+        }));
 
         const userActive = await conn.write('/ip/hotspot/active/print');
         const userHost = await conn.write('/ip/hotspot/host/print');
@@ -48,6 +61,7 @@ export async function load() {
         // console.log(userHost.some(obj => obj['mac-address'] == '08:00:27:4A:24:E4'));
 
         // console.log(userBinding[0]['disabled'])
+        console.log(hostData.filter(obj => obj['host-name'].match(/^lab1-.*/)).sort(customSortNew))
         conn.close();
         return {
             komputer: hostData,
