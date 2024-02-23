@@ -1,0 +1,74 @@
+[
+    {
+        "host-name": "lab2-b1",
+        "active-mac-address": "00:00:55:55:55:55",
+        "active-address": "192.168.0.250",
+        "address": "192.168.0.250",
+        "dynamic": "true",
+        "status": "bound"
+    },
+    {
+        "host-name": "lab3-b1",
+        "active-mac-address": "00:00:88:88:88:88",
+        "active-address": "192.168.0.248",
+        "address": "192.168.0.248",
+        "dynamic": "true",
+        "status": "bound"
+    },
+    {
+        "host-name": "lab2-c1",
+        "active-mac-address": "00:00:66:66:66:66",
+        "active-address": "192.168.0.247",
+        "address": "192.168.0.247",
+        "dynamic": "true",
+        "status": "bound"
+    },
+    {
+        "host-name": "lab1-a1",
+        "active-mac-address": "00:00:11:11:11:11",
+        "active-address": "192.168.0.254",
+        "address": "192.168.0.254",
+        "dynamic": "true",
+        "status": "bound"
+    },
+    {
+        "host-name": "lab1-b1",
+        "active-mac-address": "00:00:22:22:22:22",
+        "active-address": "192.168.0.253",
+        "address": "192.168.0.253",
+        "dynamic": "true",
+        "status": "bound"
+    },
+    {
+        "host-name": "lab1-c1",
+        "active-mac-address": "00:00:33:33:33:33",
+        "active-address": "192.168.0.252",
+        "address": "192.168.0.252",
+        "dynamic": "true",
+        "status": "bound"
+    },
+    {
+        "host-name": "lab2-a1",
+        "active-mac-address": "00:00:44:44:44:44",
+        "active-address": "192.168.0.251",
+        "address": "192.168.0.251",
+        "dynamic": "true",
+        "status": "bound"
+    },
+    {
+        "host-name": "lab3-c1",
+        "active-mac-address": "00:00:99:99:99:99",
+        "active-address": "192.168.0.246",
+        "address": "192.168.0.246",
+        "dynamic": "true",
+        "status": "bound"
+    },
+    {
+        "host-name": "lab3-a1",
+        "active-mac-address": "00:00:77:77:77:77",
+        "active-address": "192.168.0.249",
+        "address": "192.168.0.249",
+        "dynamic": "true",
+        "status": "bound"
+    }
+]

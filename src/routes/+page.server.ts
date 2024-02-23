@@ -61,7 +61,8 @@ export async function load() {
         // console.log(userHost.some(obj => obj['mac-address'] == '08:00:27:4A:24:E4'));
 
         // console.log(userBinding[0]['disabled'])
-        console.log(hostData.filter(obj => obj['host-name'].match(/^lab1-.*/)).sort(customSortNew))
+        // filter(obj => obj['host-name'].match(/^lab1-.*/)).sort(customSortNew)
+        console.log(hostData)
         conn.close();
         return {
             komputer: hostData,
