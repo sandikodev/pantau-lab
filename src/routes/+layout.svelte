@@ -17,9 +17,7 @@
 			</ul>
 		</div>
 	</aside>
-	<main class="overflow-y-auto flex-1 bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500">
-		<div class="container my-12 mx-auto px-4 md:px-12">
-			<slot><!-- optional fallback --></slot>
-		</div>
+	<main class="flex-grow flex flex-col bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500">
+		<slot><!-- optional fallback --></slot>
 	</main>
 </div>
